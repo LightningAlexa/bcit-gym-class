@@ -2,7 +2,19 @@
     "interactionModel":{
         "languageModel":{
             "invocationName":"gym bookings",
-            "types":[],
+            "types":[
+              {
+                "values": [
+                  {
+                    "name": {
+                      "value":"spinning",
+                      "synonyms":[]
+                    }
+                  }
+                ],
+                "name": "CLASS_NAME"
+              }
+            ],
             "intents":[
                 {
                   "name": "AMAZON.CancelIntent",
@@ -17,20 +29,48 @@
                   "samples": []
                 },
                 {
-                    "name":"RollDiceIntent",
+                  "name": "AMAZON.YesIntent",
+                  "samples": []
+                },
+                {
+                  "name": "AMAZON.NoIntent",
+                  "samples": []
+                },
+                {
+                    "name":"ListClassesForDayIntent",
                     "slots":[
                       {
-                        "name":"sides",
-                        "type":"AMAZON.NUMBER"
-                      },
-                      {
-                        "name":"numDice",
-                        "type":"AMAZON.NUMBER"
+                        "name":"day",
+                        "type":"AMAZON.DATE"
                       }
                     ],
                     "samples":[
-                      "roll {numDice} d {sides}"
+                      "Tell me which classes are available {day}"
                     ]
+                },
+                {
+                  "name":"RegisterForClassIntent",
+                  "slots": [
+                    {
+                      "name":"className",
+                      "type":"CLASS_NAME"
+                    }
+                  ],
+                  "samples": [
+                    "Sign me up for {className}"
+                  ]
+                },
+                {
+                  "name":"ReadClassDescriptionIntent",
+                  "slots": [
+                    {
+                      "name":"className",
+                      "type":"CLASS_NAME"
+                    }
+                  ],
+                  "samples": [
+                    "Tell me more about {className}"
+                  ]
                 }
             ]
         }
