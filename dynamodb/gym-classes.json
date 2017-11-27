@@ -1,0 +1,73 @@
+{
+    "gym-classes": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "class_id": {"S":"rec001"},
+                    "class_name": {"S":"Spin to Win"},
+                    "class_description": {"S":"Ride from the shoreline to the hills in this journey that is. designed to provide you with the optimum in fat burning and strength building. This ride will simulate varied terrain as you tackle rolling hills, sprints and other drills to give you a great interval workout."},
+                    "class_instructor": {"S":"Spencer"},
+                    "class_schedule": {
+                        "L": [
+                            {"M": {"day": {"S":"Monday"}, "time": {"N":"1030"}}},
+                            {"M": {"day": {"S":"Wednesday"}, "time": {"N":"1430"}}},
+                            {"M": {"day": {"S":"Friday"}, "time": {"N":"1630"}}}
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "class_id": {"S":"rec002"},
+                    "class_name": {"S":"Moo Thai"},
+                    "class_description": {"S":"The class will focus on lots of knees, positioning, sweeps, elbow work and the cardio needed to be successful at clinch work. You will also be wearing cow kigurumis."},
+                    "class_instructor": {"S":"Mark"},
+                    "class_schedule": {
+                        "L": [
+                            {"M": {"day": {"S":"Tuesday"}, "time": {"N":"1130"}}},
+                            {"M": {"day": {"S":"Thursday"}, "time": {"N":"1330"}}}
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "class_id": {"S":"rec003"},
+                    "class_name": {"S":"Artistic Gymnastics"},
+                    "class_description": {"S":"Designed to allow students at all levels to enjoy the sport of gymnastics, whether their goal is to compete, or to have fun and get some exercise."},
+                    "class_instructor": {"S":"Andy"},
+                    "class_schedule": {
+                        "L": [
+                            {"M": {"day": {"S":"Monday"}, "time": {"N":"0830"}}},
+                            {"M": {"day": {"S":"Tuesday"}, "time": {"N":"0830"}}},
+                            {"M": {"day": {"S":"Wednesday"}, "time": {"N":"0830"}}},
+                            {"M": {"day": {"S":"Thursday"}, "time": {"N":"0830"}}},
+                            {"M": {"day": {"S":"Friday"}, "time": {"N":"0830"}}}
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "class_id": {"S":"rec004"},
+                    "class_name": {"S":"Kungfu with Kenny"},
+                    "class_description": {"S":"This Kung Fu class teaches traditional Chinese martial arts with initial emphasis on conditioning, flexibility and self defense skills."},
+                    "class_instructor": {"S":"Kenneth"},
+                    "class_schedule": {
+                        "L": [
+                            {"M": {"day": {"S":"Monday"}, "time": {"N":"1130"}}},
+                            {"M": {"day": {"S":"Tuesday"}, "time": {"N":"1330"}}},
+                            {"M": {"day": {"S":"Wednesday"}, "time": {"N":"1330"}}}
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
