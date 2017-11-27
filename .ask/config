@@ -1,0 +1,30 @@
+{
+  "deploy_settings": {
+    "default": {
+      "skill_id": "",
+      "was_cloned": false,
+      "merge": {
+        "skillManifest": {
+          "apis": {
+            "custom": {
+              "endpoint": {
+                "uri": "ask-custom-bcit-gym-class-default"
+              }
+            }
+          }
+        }
+      }
+    },
+    "deadbeef": {
+      "skill_id": "amzn1.ask.skill.726c3a43-eb28-4600-9266-8f787cbd6243",
+      "was_cloned": false,
+      "merge": {
+        "skillManifest": {
+          "apis": {
+            "custom": {}
+          }
+        }
+      }
+    }
+  }
+}

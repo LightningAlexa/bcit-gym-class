@@ -1,0 +1,38 @@
+{
+    "interactionModel":{
+        "languageModel":{
+            "invocationName":"bcit gym bookings",
+            "types":[],
+            "intents":[
+                {
+                  "name": "AMAZON.CancelIntent",
+                  "samples": []
+                },
+                {
+                  "name": "AMAZON.HelpIntent",
+                  "samples": []
+                },
+                {
+                  "name": "AMAZON.StopIntent",
+                  "samples": []
+                },
+                {
+                    "name":"RollDiceIntent",
+                    "slots":[
+                      {
+                        "name":"sides",
+                        "type":"AMAZON.NUMBER"
+                      },
+                      {
+                        "name":"numDice",
+                        "type":"AMAZON.NUMBER"
+                      }
+                    ],
+                    "samples":[
+                      "roll {numDice} d {sides}"
+                    ]
+                }
+            ]
+        }
+    }
+}
