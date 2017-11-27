@@ -5,7 +5,7 @@
                 "Item": {
                     "class_id": {"S":"rec001"},
                     "class_name": {"S":"Spin to Win"},
-                    "class_description": {"S":"Ride from the shoreline to the hills in this journey that is. designed to provide you with the optimum in fat burning and strength building. This ride will simulate varied terrain as you tackle rolling hills, sprints and other drills to give you a great interval workout."},
+                    "class_description": {"S":"Ride from the shoreline to the hills in this journey that is designed to provide you with the optimum in fat burning and strength building. This ride will simulate varied terrain as you tackle rolling hills, sprints and other drills to give you a great interval workout."},
                     "class_instructor": {"S":"Spencer"},
                     "class_schedule": {
                         "L": [
