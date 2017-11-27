@@ -3,7 +3,7 @@ var Alexa = require("alexa-sdk");
 
 
 const roll = (sides) => {
-    return Math.random() * (sides - 1) + 1;
+    return Math.round(Math.random() * (sides - 1) + 1);
 };
 
 // For detailed tutorial on how to making a Alexa skill,
@@ -27,7 +27,7 @@ var handlers = {
         while (numDice--)
             rolledNum += roll(sides);
         
-        this.response.speak('You rolled a ' + 6);
+        this.response.speak('You rolled a ' + rolledNum);
         this.emit(':responseReady');
     },
     'SessionEndedRequest' : function() {

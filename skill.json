@@ -5,7 +5,7 @@
         "en-US": {
           "summary": "BCIT Gym Class Bookings",
           "examplePhrases": [
-            "Alexa start BCIT gym bookings"
+            "Alexa start gym bookings"
           ],
           "name": "bcit-gym-bookings",
           "description": "Sample Full Description"
