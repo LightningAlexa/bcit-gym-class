@@ -1,0 +1,40 @@
+{
+    "gym-users": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "user_id": {"S":"A00941761"},
+                    "user_email": {"S":"mennis2@my.bcit.ca"},
+                    "user_code": {"S":"0"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "user_id": {"S":"A00797801"},
+                    "user_email": {"S":"kculala@my.bcit.ca"},
+                    "user_code": {"S":"0"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "user_id": {"S":"A00933813"},
+                    "user_email": {"S":"spencerdleslie@gmail.com"},
+                    "user_code": {"S":"0"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "user_id": {"S":"A00954644 "},
+                    "user_email": {"S":"alin112@my.bcit.ca"},
+                    "user_code": {"S":"0"}
+                }
+            }
+        }
+    ]   
+}
