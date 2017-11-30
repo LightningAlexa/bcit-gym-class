@@ -107,6 +107,9 @@ var newSessionHandlers = {
             .listen("Would you like to hear about today's gym classes?");
         this.emit(':responseReady');
     },
+    'SendEmailIntent' : function() {
+        getStudentEmail("A00941761");
+    },
     'SessionEndedRequest' : function() {
         console.log('Session ended with reason: ' + this.event.request.reason);
     },
@@ -137,3 +140,73 @@ var newSessionHandlers = {
         this.response.speak("Sorry, I didn't get that");
     },
 };
+
+function sendEmail(recipient) {
+    var ses = new AWS.SES();
+    const verification_code = generateCode();
+    const charset = 'UTF-8';
+    const sender = process.env.SENDER_EMAIL;
+    const subject = 'Verification code';
+    const body_text = 'Your verification code for Alexa is' + verification_code;
+    const body_html = '<html><head></head><body>'
+    + '<h3>Verification code for Alexa Login</h3>'
+    + '<p>Your verification code is '
+    + verification_code
+    + '</p></body></html>';
+
+    var params = {
+        Source: sender,
+        Destination: {
+            ToAddresses: [
+                recipient
+            ],
+        },
+        Message: {
+            Subject: {
+                Data: subject,
+                Charset: charset
+            },
+            Body: {
+                Text: {
+                    Data: body_text,
+                    Charset: charset
+                },
+                Html: {
+                    Data: body_html,
+                    Charset: charset
+                }
+            }
+        }
+    };
+    ses.sendEmail(params, function(err, data) {
+        if(err) {
+            console.log(err.message);
+        } else {
+            console.log("Email sent! Message ID: ", data.MessageId);
+        }
+    });
+}
+
+function generateCode() {
+    return parseInt(Math.random() * 10000);
+}
+
+function getStudentEmail(stdId) {
+    var dynamo = new AWS.DynamoDB();
+    var params = {
+        TableName: "gym-users",
+        Key: {
+            user_id: {
+                S: "A00941761"
+            }
+        }
+    };
+    dynamo.getItem(params, function (err, data) {
+        if(err) {
+            console.log(err.message);
+        } else {
+            sendEmail(data.Item.email.S);
+            console.log(data);
+        }
+    });
+}

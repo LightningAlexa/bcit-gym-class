@@ -55,6 +55,12 @@ provider:
         - lambda:invokeFunction
       Resource:
         - arn:aws:lambda:*:*:function:${self:service}-index
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource:
+        - "*"
 
 # you can define service wide environment variables here
 #  environment:
@@ -106,8 +112,8 @@ functions:
 #          trigger: PreSignUp
 
 #    Define function environment variables here
-#    environment:
-#      variable2: value2
+    environment:
+      SENDER_EMAIL: "mennis2@my.bcit.ca"
 
 # you can add CloudFormation resource templates here
 #resources:
