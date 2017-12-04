@@ -16,6 +16,8 @@ const states = {
     AUTH_VERIFY_CODE: "AUTH_VERIFY_CODE"
 };
 
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDENT_NUMBER, {
     'AMAZON.YesIntent': function() {
         this.response.speak('auth starts here');
@@ -74,11 +76,17 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
 
     'ListClassesForDayIntent': function(defaultDay) {
         console.log('listclassesfordayintent');
-        var day = defaultDay || this.event.request.intent.slots.day.value;
+        const day = getDayOfWeek(defaultDay, this.event);
+        var params = {
+            TableName: process.env.CLASSES_TABLE
+        };
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        this.response.speak('List classes for ' + day + ' intent')
-        .listen('would you like to hear more about one of these classes?');
-        this.emit(':responseReady');
+        dynamo.scan(params).promise()
+        .then(data => {
+            this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
+            .listen('would you like to hear more about one of these classes?');
+            this.emit(':responseReady');
+        });
     },
 
     'RegisterForClassIntent': function() {
@@ -170,6 +178,35 @@ var newSessionHandlers = {
         this.response.speak("Sorry, I didn't get that");
     },
 };
+
+function getDayOfWeek(defaultDay, event) {
+    if (defaultDay) {
+        return days[(new Date()).getDay()];
+    } else {
+        return days[(new Date(event.request.intent.slots.day.value)).getDay()];
+    }
+}
+
+function getClassesForDay(data, day) {
+    const classes = data.Items;
+    var classesOnDay = [];
+    for (var i = 0; i < classes.length; i++) {
+        var schedule = classes[i].class_schedule.L;
+        if (classIsOnDay(schedule, day)) {
+            classesOnDay.push(classes[i].class_name.S);
+        };
+    }
+    return [classesOnDay.slice(0, -1).join(', '), classesOnDay.slice(-1)[0]].join(classesOnDay.length < 2 ? '' : ' and ');
+}
+
+function classIsOnDay(schedule, day) {
+    for (var j = 0; j < schedule.length; j++) {
+        if (day === schedule[j].M.day.S) {
+            return true;
+        }
+    }
+    return false;
+}
 
 function sendEmail(recipient, stdId) {
     var ses = new AWS.SES();
