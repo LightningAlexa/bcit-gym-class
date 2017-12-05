@@ -1,10 +1,13 @@
 'use strict';
 var Alexa = require("alexa-sdk");
 var AWS = require("aws-sdk");
-var dynamo = new AWS.DynamoDB();
+var DynamoAccess = require("./dynamoAccess.js");
+var dbAccess;
+
 exports.handler = function(event, context) {
     var alexa = Alexa.handler(event, context);
-    console.log(event);
+    dbAccess = new DynamoAccess();
+    console.log(dbAccess);
     alexa.registerHandlers(newSessionHandlers, listClassesHandler, classDescriptionHandler, authStudentNumberHandler);
     alexa.execute();
 };
@@ -26,15 +29,11 @@ const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDEN
     'GiveStudentNumberIntent' : function() {
         var stdId = this.event.request.intent.slots.studentNumber.value
         this.handler.state = states.AUTH_VERIFY_CODE;
-        getStudentEmail(stdId);
+        dbAccess.getStudentEmail(stdId, sendEmail);
     },
     'AMAZON.NoIntent': function() {
         this.handler.state = states.LIST_CLASSES;
         this.emitWithState('ListClassesForDayIntent', 'today');
-    },
-    'AMAZON.NoIntent': function() {
-        this.response.speak('Thank you for using the booking system');
-        this.emit(':responseReady');
     },
     'AMAZON.StopIntent': function() {
         this.response.speak('Thank you for using the booking system');
@@ -46,10 +45,6 @@ const authCodeHandler = Alexa.CreateStateHandler(states.AUTH_VERIFY_CODE, {
     'AMAZON.YesIntent': function() {
         this.response.speak('auth code verification here');
         this.emit(':responseReady');
-    },
-    'AMAZON.NoIntent': function() {
-        this.handler.state = states.LIST_CLASSES;
-        this.emitWithState('ListClassesForDayIntent', 'today');
     },
 
     'AMAZON.NoIntent': function() {
@@ -77,12 +72,8 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
     'ListClassesForDayIntent': function(defaultDay) {
         console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
-        var params = {
-            TableName: process.env.CLASSES_TABLE
-        };
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        dynamo.scan(params).promise()
-        .then(data => {
+        dbAccess.listClassesForDay(day, (data) => {
             this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');
@@ -151,14 +142,7 @@ var newSessionHandlers = {
     'SessionEndedRequest' : function() {
         console.log('Session ended with reason: ' + this.event.request.reason);
     },
-    'AMAZON.StopIntent' : function() {
-        this.response.speak('Bye');
-        this.emit(':responseReady');
-    },
-    'AMAZON.HelpIntent' : function() {
-        this.response.speak("You can try: 'alexa, ask dice roller to roll a d 6' or 'alexa, ask dice roller to roll a d 20'");
-        this.emit(':responseReady');
-    },
+
     'AMAZON.CancelIntent' : function() {
         this.response.speak('Bye');
         this.emit(':responseReady');
@@ -245,7 +229,7 @@ function sendEmail(recipient, stdId) {
             }
         }
     };
-    saveCodeToDB(stdId, verification_code);
+    dbAccess.saveCodeToDB(stdId, verification_code);
     ses.sendEmail(params, (err, data) => {
         if(err) {
             console.log(err.message);
@@ -257,50 +241,4 @@ function sendEmail(recipient, stdId) {
 
 function generateCode() {
     return parseInt(Math.random() * 10000);
-}
-
-function getStudentEmail(stdId) {
-    var params = {
-        TableName: process.env.USERS_TABLE,
-        Key: {
-            user_id: {
-                S: stdId
-            }
-        }
-    };
-    dynamo.getItem(params, function (err, data) {
-        if(err) {
-            console.log(err.message);
-        } else {
-            sendEmail(data.Item.email.S, stdId);
-            console.log(data);
-        }
-    });
-}
-
-function saveCodeToDB(stdId, code) {
-    var params = {
-        ExpressionAttributeNames: {
-            "#C": "code"
-        },
-        ExpressionAttributeValues: {
-            ":c": {
-                N: code.toString()
-            }
-        },
-        Key: {
-            "user_id": {
-                S: stdId
-            }
-        },
-        ReturnValues: "ALL_NEW",
-        TableName: process.env.USERS_TABLE,
-        UpdateExpression: "SET #C = :c"
-    };
-    dynamo.updateItem(params, function(err, data) {
-        if(err)
-            console.log(err.message);
-        else
-            console.log("Code entered in DB");
-    })
 }
