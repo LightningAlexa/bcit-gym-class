@@ -77,7 +77,7 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
         const day = getDayOfWeek(defaultDay, this.event);
         this.handler.state = states.READ_CLASS_DESCRIPTION;
         dbAccess.listClassesForDay((data) => {
-            this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
+            this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day) + ".  Would you like to hear more about one of these classes?")
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');
         });
