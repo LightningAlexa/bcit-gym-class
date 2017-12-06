@@ -66,7 +66,6 @@ DynamoAccess.prototype.getClassDescription = function(className, callback) {
         FilterExpression: "class_name = :n",
         TableName: process.env.CLASSES_TABLE
     };
-    console.log(params);
     dynamo.scan(params).promise().then(callback);
 }
 
