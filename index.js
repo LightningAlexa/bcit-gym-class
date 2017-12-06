@@ -8,7 +8,6 @@ exports.handler = function(event, context) {
     var alexa = Alexa.handler(event, context);
     dbAccess = new DynamoAccess();
     console.log(event);
-    console.log(JSON.stringify(event.request.intent));
     alexa.registerHandlers(newSessionHandlers, listClassesHandler, classDescriptionHandler,
         authStudentNumberHandler, authCodeHandler);
     alexa.execute();
@@ -33,8 +32,9 @@ const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDEN
     'GiveStudentNumberIntent' : function() {
         var stdId = this.event.request.intent.slots.studentNumber.value
         var stdNo = "A00" + stdId;
-        console.log('stdno: ' + stdNo);
+
         this.attributes['studentNumber'] = stdNo;
+
         dbAccess.getStudent(stdNo, (err, data) => {
             if (err) {
                 this.response.speak('I couldn\'t find that student number.  Could you give that to me again?')
@@ -73,20 +73,27 @@ const authCodeHandler = Alexa.CreateStateHandler(states.AUTH_VERIFY_CODE, {
     'VerifyCodeIntent': function() {
         var code = this.event.request.intent.slots.verificationCode.value
         var stdId = this.attributes['studentNumber'];
+        var classId = this.attributes['classId'];
+        var day = this.attributes['day'];
+
         var student = dbAccess.getStudent(stdId, (err, data) => {
             if (err) {
                 this.response.speak('Something went wrong');
                 this.emit(':tell');
             } else {
-                console.log(JSON.stringify(data.Item));
                 var stdCode = data.Item.user_code.N;
-                if (code == stdCode) {
+                if (code === stdCode) {
                     console.log('VERIFICATION SUCCESS');
-                    this.response.speak('The code successfully validated');
-                    this.emit(':responseReady');
+                    dbAccess.createBooking(stdId, classId, day, (err, data) => {
+                        if (err) {
+                            this.response.speak('There was an error creating your booking.  Please try again later.');
+                        } else {
+                            this.response.speak('Your booking has been created.  Enjoy your class!');
+                        }
+                        this.emit(':responseReady');
+                    });
                 } else {
-                    console.log('VERIFICATION FAILURE');
-                    this.response.speak('The code did not validate. Your ' + code + ' does not equal ' + stdCode);
+                    this.response.speak('Yor verification code doesn\'t match what I was expecting.');
                     this.emit(':responseReady');
                 }
             }
@@ -121,9 +128,10 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
     },
 
     'ListClassesForDayIntent': function(defaultDay) {
-        console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
+        this.attributes['day'] = day;
         this.handler.state = states.READ_CLASS_DESCRIPTION;
+
         dbAccess.listClassesForDay((err, data) => {
             this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day) + ".  Would you like to hear more about one of these classes?")
             .listen('would you like to hear more about one of these classes?');
@@ -154,9 +162,9 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
 const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCRIPTION, {
 
     'ReadClassDescriptionIntent': function() {
-        console.log(JSON.stringify(this.event.request.intent.slots));
         var className = this.event.request.intent.slots.className.value;
         console.log('received description request for ' + className);
+
         dbAccess.getClassDescription(className.toLowerCase(), (err, data) => {
             if (err) {
                 this.response.speak('something went wrong');
@@ -164,7 +172,10 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
             } else {
                 this.response.speak(data.Items[0].class_description.S + ' Would you like to register?')
                     .listen('would you like to sign up for this class?');
+
+                this.attributes['classId'] = data.Items[0].class_id.S;
                 this.handler.state = states.AUTH_GET_STUDENT_NUMBER;
+
                 this.emit(':responseReady');
             }
         });
@@ -194,10 +205,11 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
 
 var newSessionHandlers = {
     'NewSession': function () {
-        console.log('newSessionHandlers new session');
         this.handler.state = states.LIST_CLASSES;
+
         this.response.speak("Welcome to b.c.i.t gym class bookings. Would you like to hear about today's gym classes?")
-        .listen("Would you like to hear about today's gym classes?");
+            .listen("Would you like to hear about today's gym classes?");
+
         this.emit(':responseReady');
     },
     'SessionEndedRequest' : function() {
