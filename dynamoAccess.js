@@ -79,4 +79,23 @@ DynamoAccess.prototype.getClassDescription = function(className, callback) {
     });
 }
 
+DynamoAccess.prototype.createBooking = function(studentId, classId, day, callback) {
+    var params = {
+        Item: {
+            "user_id": { S: studentId },
+            "class_id": { S: classId + '-' + day }
+        },
+        ReturnConsumedCapacity: "TOTAL",
+        TableName: process.env.BOOKINGS_TABLE
+    };
+    dynamo.putItem(params, function(err, data) {
+        if (err) {
+            console.log(err);
+            return callback(err);
+        } else {
+            return callback(null, data);
+        }
+    });
+}
+
 module.exports = DynamoAccess;
