@@ -41,7 +41,7 @@ const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDEN
                     .listen('Please provide your student number to continue');
                 this.emit(':responseReady');
             } else {
-                sendEmail(data.Item.user_email.S, stdId, (err, data) => {
+                sendEmail(data.Item.user_email.S, stdNo, (err, data) => {
                     if (err) {
                         this.response.speak(
                             'Something went wrong while sending the email.  Please try again later.');
@@ -78,12 +78,16 @@ const authCodeHandler = Alexa.CreateStateHandler(states.AUTH_VERIFY_CODE, {
                 this.response.speak('Something went wrong');
                 this.emit(':tell');
             } else {
-                var stdCode = data.Item.code.value;
+                console.log(JSON.stringify(data.Item));
+                var stdCode = data.Item.user_code.N;
                 if (code == stdCode) {
+                    console.log('VERIFICATION SUCCESS');
                     this.response.speak('The code successfully validated');
-                    this.emit(':tell');
+                    this.emit(':responseReady');
                 } else {
+                    console.log('VERIFICATION FAILURE');
                     this.response.speak('The code did not validate. Your ' + code + ' does not equal ' + stdCode);
+                    this.emit(':responseReady');
                 }
             }
         });
@@ -120,7 +124,7 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
         console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        dbAccess.listClassesForDay((data) => {
+        dbAccess.listClassesForDay((err, data) => {
             this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day) + ".  Would you like to hear more about one of these classes?")
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');

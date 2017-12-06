@@ -26,7 +26,7 @@ DynamoAccess.prototype.getStudent = function(stdId, callback) {
 DynamoAccess.prototype.saveCodeToDB = function(stdId, code, callback) {
     var params = {
         ExpressionAttributeNames: {
-            "#C": "code"
+            "#C": "user_code"
         },
         ExpressionAttributeValues: {
             ":c": {

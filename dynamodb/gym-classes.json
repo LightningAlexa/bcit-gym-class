@@ -56,7 +56,7 @@
             "PutRequest": {
                 "Item": {
                     "class_id": {"S":"rec004"},
-                    "class_name": {"S":"kungfu with kenny"},
+                    "class_name": {"S":"kung fu with kenny"},
                     "class_description": {"S":"This Kung Fu class teaches traditional Chinese martial arts with initial emphasis on conditioning, flexibility and self defense skills."},
                     "class_instructor": {"S":"Kenneth"},
                     "class_schedule": {
