@@ -4,7 +4,7 @@
             "PutRequest": {
                 "Item": {
                     "class_id": {"S":"rec001"},
-                    "class_name": {"S":"Spin to Win"},
+                    "class_name": {"S":"spin to win"},
                     "class_description": {"S":"Ride from the shoreline to the hills in this journey that is designed to provide you with the optimum in fat burning and strength building. This ride will simulate varied terrain as you tackle rolling hills, sprints and other drills to give you a great interval workout."},
                     "class_instructor": {"S":"Spencer"},
                     "class_schedule": {
@@ -21,7 +21,7 @@
             "PutRequest": {
                 "Item": {
                     "class_id": {"S":"rec002"},
-                    "class_name": {"S":"Moo Thai"},
+                    "class_name": {"S":"moo thai"},
                     "class_description": {"S":"The class will focus on lots of knees, positioning, sweeps, elbow work and the cardio needed to be successful at clinch work. You will also be wearing cow kigurumis."},
                     "class_instructor": {"S":"Mark"},
                     "class_schedule": {
@@ -37,7 +37,7 @@
             "PutRequest": {
                 "Item": {
                     "class_id": {"S":"rec003"},
-                    "class_name": {"S":"Artistic Gymnastics"},
+                    "class_name": {"S":"artistic gymnastics"},
                     "class_description": {"S":"Designed to allow students at all levels to enjoy the sport of gymnastics, whether their goal is to compete, or to have fun and get some exercise."},
                     "class_instructor": {"S":"Andy"},
                     "class_schedule": {

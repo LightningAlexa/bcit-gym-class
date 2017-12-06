@@ -106,7 +106,8 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
 const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCRIPTION, {
     'ReadClassDescriptionIntent': function() {
         var className = this.event.request.intent.slots.className.value;
-        dbAccess.getClassDescription(className, (data) => {
+        console.log(className);
+        dbAccess.getClassDescription(className.toLowerCase(), (data) => {
             this.response.speak(data.Items[0].class_description.S + ' Would you like to register?')
             .listen('would you like to sign up for this class?');
             this.handler.state = states.AUTH_GET_STUDENT_NUMBER;
