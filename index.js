@@ -186,6 +186,12 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
         this.emitWithState('ListClassesForDayIntent');
     },
 
+    'SessionEndedRequest' : function() {
+        console.log('Session ended with reason: ' + this.event.request.reason);
+        this.response.speak('Ok, bye');
+        this.emit(':responseReady');
+    },
+
     'AMAZON.YesIntent': function() {
         this.response.speak("Which class would you like to hear more about?")
             .listen('Which one would you like to hear more about?');
@@ -193,8 +199,8 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
     },
 
     'AMAZON.NoIntent': function() {
-        this.handler.state = states.LIST_CLASSES;
-        this.emitWithState('ListClassesForDayIntent', today);
+        this.response.speak('Thank you for using the booking system');
+        this.emit(':responseReady');
     },
 
     'AMAZON.StopIntent': function() {
@@ -237,10 +243,12 @@ var newSessionHandlers = {
 };
 
 function getDayOfWeek(defaultDay, event) {
-    if (defaultDay) {
-        return days[(new Date()).getDay()];
-    } else {
+    if (event.request.intent.slots && event.request.intent.slots.day.value) {
         return days[(new Date(event.request.intent.slots.day.value)).getDay()];
+    } else if (event.session.attributes.day) {
+        return event.session.attributes.day;
+    } else {
+        return days[(new Date()).getDay()];
     }
 }
 
