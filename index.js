@@ -7,7 +7,7 @@ var dbAccess;
 exports.handler = function(event, context) {
     var alexa = Alexa.handler(event, context);
     dbAccess = new DynamoAccess();
-    console.log(dbAccess);
+    console.log(event);
     alexa.registerHandlers(newSessionHandlers, listClassesHandler, classDescriptionHandler, authStudentNumberHandler);
     alexa.execute();
 };
@@ -29,7 +29,10 @@ const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDEN
     'GiveStudentNumberIntent' : function() {
         var stdId = this.event.request.intent.slots.studentNumber.value
         this.handler.state = states.AUTH_VERIFY_CODE;
-        dbAccess.getStudentEmail(stdId, sendEmail);
+        dbAccess.getStudent(stdId, (data) => {
+            console.log(data);
+            sendEmail(data.Item.email.S);
+        });
     },
     'AMAZON.NoIntent': function() {
         this.handler.state = states.LIST_CLASSES;
@@ -73,7 +76,7 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
         console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        dbAccess.listClassesForDay(day, (data) => {
+        dbAccess.listClassesForDay((data) => {
             this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');
@@ -103,10 +106,13 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
 const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCRIPTION, {
     'ReadClassDescriptionIntent': function() {
         var className = this.event.request.intent.slots.className.value;
-        this.response.speak('you asked for ' + className + ', would you like to register?')
-        .listen('would you like to sign up for this class?');
-        this.handler.state = 'AUTH_GET_STUDENT_NUMBER';
-        this.emit(':responseReady');
+        dbAccess.getClassDescription(className, (data) => {
+            this.response.speak(data.Items[0].class_description.S + ' Would you like to register?')
+            .listen('would you like to sign up for this class?');
+            this.handler.state = states.AUTH_GET_STUDENT_NUMBER;
+            this.emit(':responseReady');
+        });
+
     },
 
     'ListClassesForDayIntent': function() {

@@ -3,7 +3,7 @@ var dynamo = new AWS.DynamoDB();
 
 function DynamoAccess() {};
 
-DynamoAccess.prototype.getStudentEmail = function(stdId, callback) {
+DynamoAccess.prototype.getStudent = function(stdId, callback) {
     var params = {
         TableName: process.env.USERS_TABLE,
         Key: {
@@ -16,7 +16,7 @@ DynamoAccess.prototype.getStudentEmail = function(stdId, callback) {
         if(err) {
             console.log(err.message);
         } else {
-            callback(data.Item.email.S, stdId);
+            callback(data);
             console.log(data);
         }
     });
@@ -49,8 +49,21 @@ DynamoAccess.prototype.saveCodeToDB = function(stdId, code) {
     });
 }
 
-DynamoAccess.prototype.listClassesForDay = function(day, callback) {
+DynamoAccess.prototype.listClassesForDay = function(callback) {
     var params = {
+        TableName: process.env.CLASSES_TABLE
+    };
+    dynamo.scan(params).promise().then(callback);
+}
+
+DynamoAccess.prototype.getClassDescription = function(className, callback) {
+    var params = {
+        ExpressionAttributeValues: {
+            ":n": {
+                S: className
+            }
+        },
+        FilterExpression: "class_name = :n",
         TableName: process.env.CLASSES_TABLE
     };
     dynamo.scan(params).promise().then(callback);
