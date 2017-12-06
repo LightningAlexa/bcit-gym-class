@@ -120,8 +120,8 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
         console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        dbAccess.listClassesForDay((err, data) => {
-            this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
+        dbAccess.listClassesForDay((data) => {
+            this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day) + ".  Would you like to hear more about one of these classes?")
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');
         });
@@ -153,7 +153,7 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
         console.log(JSON.stringify(this.event.request.intent.slots));
         var className = this.event.request.intent.slots.className.value;
         console.log('received description request for ' + className);
-        dbAccess.getClassDescription(className, (err, data) => {
+        dbAccess.getClassDescription(className.toLowerCase(), (err, data) => {
             if (err) {
                 this.response.speak('something went wrong');
                 this.emit(':tell');
