@@ -1,78 +1,107 @@
 {
-    "interactionModel":{
-        "languageModel":{
-            "invocationName":"gym bookings",
-            "types":[
-              {
-                "values": [
-                  {
-                    "name": {
-                      "value":"spinning",
-                      "synonyms":[]
-                    }
-                  }
-                ],
-                "name": "CLASS_NAME"
+  "interactionModel":{
+    "languageModel":{
+      "invocationName":"gym bookings",
+      "types":[
+        {
+          "name": "CLASS_NAME",
+          "values": [
+            {
+              "id": "CLASSNAMEID",
+              "name": {
+                "value": "spinning",
+                "synonyms": [
+                  "spin to win",
+                  "moo thai",
+                  "kung fu with kenny"
+                ]
               }
-            ],
-            "intents":[
-                {
-                  "name": "AMAZON.CancelIntent",
-                  "samples": []
-                },
-                {
-                  "name": "AMAZON.HelpIntent",
-                  "samples": []
-                },
-                {
-                  "name": "AMAZON.StopIntent",
-                  "samples": []
-                },
-                {
-                  "name": "AMAZON.YesIntent",
-                  "samples": []
-                },
-                {
-                  "name": "AMAZON.NoIntent",
-                  "samples": []
-                },
-                {
-                    "name":"ListClassesForDayIntent",
-                    "slots":[
-                      {
-                        "name":"day",
-                        "type":"AMAZON.DATE"
-                      }
-                    ],
-                    "samples":[
-                      "Tell me which classes are available {day}"
-                    ]
-                },
-                {
-                  "name":"RegisterForClassIntent",
-                  "slots": [
-                    {
-                      "name":"className",
-                      "type":"CLASS_NAME"
-                    }
-                  ],
-                  "samples": [
-                    "Sign me up for {className}"
-                  ]
-                },
-                {
-                  "name":"ReadClassDescriptionIntent",
-                  "slots": [
-                    {
-                      "name":"className",
-                      "type":"CLASS_NAME"
-                    }
-                  ],
-                  "samples": [
-                    "Tell me more about {className}"
-                  ]
-                }
-            ]
+            }
+          ]
         }
+      ],
+      "intents":[
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name":"ListClassesForDayIntent",
+          "slots":[
+            {
+              "name":"day",
+              "type":"AMAZON.DATE"
+            }
+          ],
+          "samples":[
+            "Tell me which classes are available {day}"
+          ]
+        },
+        {
+          "name":"RegisterForClassIntent",
+          "slots": [
+            {
+              "name":"className",
+              "type":"CLASS_NAME"
+            }
+          ],
+          "samples": [
+            "Sign me up for {className}"
+          ]
+        },
+        {
+          "name":"ReadClassDescriptionIntent",
+          "slots": [
+            {
+              "name":"className",
+              "type":"CLASS_NAME"
+            }
+          ],
+          "samples": [
+            "Tell me more about {className}"
+          ]
+        },
+        {
+          "name":"VerifyCodeIntent",
+          "slots": [
+            {
+              "name":"verificationCode",
+              "type":"AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "The code is {verificationCode}"
+          ]
+        },
+        {
+          "name":"GiveStudentNumberIntent",
+          "slots": [
+            {
+              "name":"studentNumber",
+              "type":"AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "My student number is {studentNumber}"
+          ]
+        }
+      ]
     }
+  }
 }

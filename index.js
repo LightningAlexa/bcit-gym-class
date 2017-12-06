@@ -8,7 +8,9 @@ exports.handler = function(event, context) {
     var alexa = Alexa.handler(event, context);
     dbAccess = new DynamoAccess();
     console.log(event);
-    alexa.registerHandlers(newSessionHandlers, listClassesHandler, classDescriptionHandler, authStudentNumberHandler);
+    console.log(JSON.stringify(event.request.intent));
+    alexa.registerHandlers(newSessionHandlers, listClassesHandler, classDescriptionHandler,
+        authStudentNumberHandler, authCodeHandler);
     alexa.execute();
 };
 
@@ -23,17 +25,40 @@ const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 
 const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDENT_NUMBER, {
     'AMAZON.YesIntent': function() {
-        this.response.speak('auth starts here');
+        this.response.speak('Please provide the last 6 digits of your student number')
+            .listen('Please provide the last 6 digits of your student number');
         this.emit(':responseReady');
     },
+
     'GiveStudentNumberIntent' : function() {
         var stdId = this.event.request.intent.slots.studentNumber.value
-        this.handler.state = states.AUTH_VERIFY_CODE;
-        dbAccess.getStudent(stdId, (data) => {
-            console.log(data);
-            sendEmail(data.Item.email.S);
+        var stdNo = "A00" + stdId;
+        console.log('stdno: ' + stdNo);
+        this.attributes['studentNumber'] = stdNo;
+        dbAccess.getStudent(stdNo, (err, data) => {
+            if (err) {
+                this.response.speak('I couldn\'t find that student number.  Could you give that to me again?')
+                    .listen('Please provide your student number to continue');
+                this.emit(':responseReady');
+            } else {
+                sendEmail(data.Item.user_email.S, stdId, (err, data) => {
+                    if (err) {
+                        this.response.speak(
+                            'Something went wrong while sending the email.  Please try again later.');
+                        this.emit(':responseReady');
+                    } else {
+                        this.handler.state = states.AUTH_VERIFY_CODE;
+                        this.response.speak(
+                            'I\'ve emailed you a verification code.  Please provide the code to complete'
+                            + 'your booking.')
+                            .listen('Please provide your verification code to complete your booking');
+                        this.emit(':responseReady');
+                    }
+                });
+            }
         });
     },
+
     'AMAZON.NoIntent': function() {
         this.handler.state = states.LIST_CLASSES;
         this.emitWithState('ListClassesForDayIntent', 'today');
@@ -45,6 +70,25 @@ const authStudentNumberHandler = Alexa.CreateStateHandler(states.AUTH_GET_STUDEN
 });
 
 const authCodeHandler = Alexa.CreateStateHandler(states.AUTH_VERIFY_CODE, {
+    'VerifyCodeIntent': function() {
+        var code = this.event.request.intent.slots.verificationCode.value
+        var stdId = this.attributes['studentNumber'];
+        var student = dbAccess.getStudent(stdId, (err, data) => {
+            if (err) {
+                this.response.speak('Something went wrong');
+                this.emit(':tell');
+            } else {
+                var stdCode = data.Item.code.value;
+                if (code == stdCode) {
+                    this.response.speak('The code successfully validated');
+                    this.emit(':tell');
+                } else {
+                    this.response.speak('The code did not validate. Your ' + code + ' does not equal ' + stdCode);
+                }
+            }
+        });
+    },
+
     'AMAZON.YesIntent': function() {
         this.response.speak('auth code verification here');
         this.emit(':responseReady');
@@ -76,7 +120,7 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
         console.log('listclassesfordayintent');
         const day = getDayOfWeek(defaultDay, this.event);
         this.handler.state = states.READ_CLASS_DESCRIPTION;
-        dbAccess.listClassesForDay((data) => {
+        dbAccess.listClassesForDay((err, data) => {
             this.response.speak('On ' + day + ' we offer: ' + getClassesForDay(data, day))
             .listen('would you like to hear more about one of these classes?');
             this.emit(':responseReady');
@@ -104,15 +148,22 @@ const listClassesHandler = Alexa.CreateStateHandler(states.LIST_CLASSES, {
 });
 
 const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCRIPTION, {
-    'ReadClassDescriptionIntent': function() {
-        var className = this.event.request.intent.slots.className.value;
-        dbAccess.getClassDescription(className, (data) => {
-            this.response.speak(data.Items[0].class_description.S + ' Would you like to register?')
-            .listen('would you like to sign up for this class?');
-            this.handler.state = states.AUTH_GET_STUDENT_NUMBER;
-            this.emit(':responseReady');
-        });
 
+    'ReadClassDescriptionIntent': function() {
+        console.log(JSON.stringify(this.event.request.intent.slots));
+        var className = this.event.request.intent.slots.className.value;
+        console.log('received description request for ' + className);
+        dbAccess.getClassDescription(className, (err, data) => {
+            if (err) {
+                this.response.speak('something went wrong');
+                this.emit(':tell');
+            } else {
+                this.response.speak(data.Items[0].class_description.S + ' Would you like to register?')
+                    .listen('would you like to sign up for this class?');
+                this.handler.state = states.AUTH_GET_STUDENT_NUMBER;
+                this.emit(':responseReady');
+            }
+        });
     },
 
     'ListClassesForDayIntent': function() {
@@ -122,7 +173,7 @@ const classDescriptionHandler = Alexa.CreateStateHandler(states.READ_CLASS_DESCR
 
     'AMAZON.YesIntent': function() {
         this.response.speak("Which class would you like to hear more about?")
-        .listen('Which one would you like to hear more about?');
+            .listen('Which one would you like to hear more about?');
         this.emit(':responseReady');
     },
 
@@ -198,7 +249,7 @@ function classIsOnDay(schedule, day) {
     return false;
 }
 
-function sendEmail(recipient, stdId) {
+function sendEmail(recipient, stdId, callback) {
     var ses = new AWS.SES();
     const verification_code = generateCode();
     const charset = 'UTF-8';
@@ -235,13 +286,16 @@ function sendEmail(recipient, stdId) {
             }
         }
     };
-    dbAccess.saveCodeToDB(stdId, verification_code);
-    ses.sendEmail(params, (err, data) => {
-        if(err) {
-            console.log(err.message);
-        } else {
-            console.log("Email sent! Message ID: ", data.MessageId);
-        }
+    dbAccess.saveCodeToDB(stdId, verification_code, (err, data) => {
+        ses.sendEmail(params, (err, data) => {
+            if(err) {
+                console.log(err.message);
+                callback(err);
+            } else {
+                console.log("Email sent! Message ID: ", data.MessageId);
+                callback(null, data);
+            }
+        });
     });
 }
 

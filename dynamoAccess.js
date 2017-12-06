@@ -15,14 +15,15 @@ DynamoAccess.prototype.getStudent = function(stdId, callback) {
     dynamo.getItem(params, (err, data) => {
         if(err) {
             console.log(err.message);
+            callback(err);
         } else {
-            callback(data);
             console.log(data);
+            callback(null, data);
         }
     });
 }
 
-DynamoAccess.prototype.saveCodeToDB = function(stdId, code) {
+DynamoAccess.prototype.saveCodeToDB = function(stdId, code, callback) {
     var params = {
         ExpressionAttributeNames: {
             "#C": "code"
@@ -42,10 +43,13 @@ DynamoAccess.prototype.saveCodeToDB = function(stdId, code) {
         UpdateExpression: "SET #C = :c"
     };
     dynamo.updateItem(params, function(err, data) {
-        if(err)
+        if(err) {
             console.log(err.message);
-        else
+            return callback(err);
+        } else {
             console.log("Code entered in DB");
+            return callback(null, data);
+        }
     });
 }
 
@@ -53,7 +57,10 @@ DynamoAccess.prototype.listClassesForDay = function(callback) {
     var params = {
         TableName: process.env.CLASSES_TABLE
     };
-    dynamo.scan(params).promise().then(callback);
+    dynamo.scan(params, (err, data) => {
+        if (err) return callback(err);
+        return callback(null, data);
+    });
 }
 
 DynamoAccess.prototype.getClassDescription = function(className, callback) {
@@ -66,7 +73,10 @@ DynamoAccess.prototype.getClassDescription = function(className, callback) {
         FilterExpression: "class_name = :n",
         TableName: process.env.CLASSES_TABLE
     };
-    dynamo.scan(params).promise().then(callback);
+    dynamo.scan(params, (err, data) => {
+        if (err) return callback(err);
+        return callback(null, data);
+    });
 }
 
 module.exports = DynamoAccess;
